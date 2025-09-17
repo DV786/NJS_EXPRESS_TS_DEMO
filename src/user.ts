@@ -1,3 +1,6 @@
+import { injectable } from "inversify";
+
+@injectable()
 export class User {
-  constructor(public name: string) { }
+  constructor() { }
 }

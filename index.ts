@@ -1,7 +1,10 @@
+import 'reflect-metadata';
+
 import express, { Request, Response, Express } from 'express';
 import { Page } from './src/page';
 import { Post } from './src/post';
 import { User } from './src/user';
+import { container } from './src/config/container';
 
 const app: Express = express();
 const port = 3001;
@@ -10,14 +13,11 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Express application");
 });
 
-app.post("/create-post", (req: Request, res: Response) => {
-  let post = new Post('New Post', 'Post Content', new User('John'));
-  res.send('Post Created');
-});
+const pageClass = container.get<Page>(Page);
 
 app.post("/create-page", (req: Request, res: Response) => {
-  let post = new Page('http://page.com', new User('John'));
-  res.send('Page Created');
+  let post = pageClass.createPage('http://mypage.com');
+  res.json(post);
 });
 
 app.listen(port, () => {
