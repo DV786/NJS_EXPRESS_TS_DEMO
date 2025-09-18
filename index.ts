@@ -4,10 +4,11 @@ import { addRoutes } from './src/config/routes.config';
 import mongoose from 'mongoose';
 import * as dotenv from 'dotenv';
 
+dotenv.config();
 const app: Express = express();
 const port = process.env.PORT;
 
-dotenv.config();
+app.use(express.json());
 
 addRoutes(app);
 
@@ -19,11 +20,9 @@ async function bootstrap() {
     }
 
     await mongoose.connect(
-      process.env.DATABASE_URL, {
-      dbName: process.env.DATABASE_NAME
-    }
+      process.env.DATABASE_URL, { dbName: process.env.DATABASE_NAME }
     );
-    console.log("Connected To MongoDB");
+    console.log("Connected To MongoDB", port);
     app.listen(port, () => {
       console.log(`Server is running at http://localhost:${port}`);
     });
