@@ -1,12 +1,36 @@
 import 'reflect-metadata';
 import express, { Request, Response, Express } from 'express';
 import { addRoutes } from './src/config/routes.config';
+import mongoose from 'mongoose';
+import * as dotenv from 'dotenv';
 
 const app: Express = express();
-const port = 3001;
+const port = process.env.PORT;
+
+dotenv.config();
 
 addRoutes(app);
 
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
-});
+async function bootstrap() {
+  try {
+    if (!process.env.DATABASE_URL) {
+      throw new Error('Cannot read environment variable');
+      process.exit(1);
+    }
+
+    await mongoose.connect(
+      process.env.DATABASE_URL, {
+      dbName: process.env.DATABASE_NAME
+    }
+    );
+    console.log("Connected To MongoDB");
+    app.listen(port, () => {
+      console.log(`Server is running at http://localhost:${port}`);
+    });
+  } catch (error) {
+    console.log(error);
+    process.exit(1);
+  }
+};
+
+bootstrap()
