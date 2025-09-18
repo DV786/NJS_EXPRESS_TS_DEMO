@@ -5,11 +5,27 @@ import { UserController } from "../user/user.controller";
 export class TasksController {
   constructor(@inject(UserController) private userController: UserController) { }
 
-  public createTask() {
-    console.log(this.userController.getUser());
+  public handlePostTask() {
     return {
       title: 'This is a title',
       description: 'Task description'
     }
   }
+
+
+  public handleGetTask() {
+    return [
+      {
+        title: 'This is a title',
+        description: 'Task description'
+      }
+    ]
+  }
+
+  public handlePatchTask() {
+    return {
+      title: 'This is a title',
+      description: 'Task description'
+    }
+  };
 }
