@@ -1,7 +1,11 @@
 import { Router, Request, Response } from "express";
-import { TasksController } from "./tasks.controller";
 import { inject, injectable } from "inversify";
+import { validationResult } from "express-validator";
+import { StatusCodes } from "http-status-codes";
+import { TasksController } from "./tasks.controller";
 import { IPartialTaskWithId, ITask } from "./tasks.interface";
+import { createTaskValidator } from "./validators/createTask.validator";
+import { getTaskValidator } from "./validators/getTask.validator";
 
 @injectable()
 export class TasksRouter {
@@ -15,15 +19,31 @@ export class TasksRouter {
   };
 
   private initializeRoutes() {
-    this.router.get('/', async (req: Request, res: Response) => {
-      const allTasks = await this.tasksController.handleGetTask(req, res);
-      res.json(allTasks);
-    });
+    this.router.get(
+      '/',
+      getTaskValidator,
+      async (req: Request, res: Response) => {
+        const result = validationResult(req);
+        console.log(result);
+        console.log(req.query);
+        const allTasks = await this.tasksController.handleGetTask(req, res);
+        res.json(allTasks);
+      }
+    );
 
-    this.router.post('/create', async (req: Request<{}, {}, ITask>, res: Response) => {
-      const newTask = await this.tasksController.handlePostTask(req, res);
-      res.json(newTask);
-    });
+    this.router.post(
+      '/create',
+      createTaskValidator,
+      async (req: Request<{}, {}, ITask>, res: Response) => {
+        const result = validationResult(req);
+        if (result.isEmpty()) {
+          const newTask = await this.tasksController.handlePostTask(req, res);
+          res.status(StatusCodes.CREATED).json(newTask);
+        } else {
+          res.status(StatusCodes.BAD_REQUEST).json(result.array());
+        }
+      }
+    );
 
     this.router.patch('/update', async (req: Request<{}, {}, IPartialTaskWithId>, res: Response) => {
       const updatedTask = await this.tasksController.handlePatchTask(req, res);

@@ -1,4 +1,4 @@
-GET http://localhost:3001/tasks
+GET http://localhost:3001/tasks/?limit=5&page=1&order=asc
 Content-Type: application/json
 
 {}
