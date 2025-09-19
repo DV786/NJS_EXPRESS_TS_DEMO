@@ -6,6 +6,7 @@ import { TasksController } from "./tasks.controller";
 import { IPartialTaskWithId, ITask } from "./tasks.interface";
 import { createTaskValidator } from "./validators/createTask.validator";
 import { getTaskValidator } from "./validators/getTask.validator";
+import { updateTaskValidator } from "./validators/updateTask.validator";
 
 @injectable()
 export class TasksRouter {
@@ -45,9 +46,17 @@ export class TasksRouter {
       }
     );
 
-    this.router.patch('/update', async (req: Request<{}, {}, IPartialTaskWithId>, res: Response) => {
-      const updatedTask = await this.tasksController.handlePatchTask(req, res);
-      res.json(updatedTask);
-    });
+    this.router.patch(
+      '/update',
+      updateTaskValidator,
+      async (req: Request<{}, {}, IPartialTaskWithId>, res: Response) => {
+        const result = validationResult(req);
+        if (result.isEmpty()) {
+          const updatedTask = await this.tasksController.handlePatchTask(req, res);
+          res.status(StatusCodes.OK).json(updatedTask);
+        } else {
+          res.status(StatusCodes.BAD_REQUEST).json(result.array())
+        };
+      });
   }
 }
