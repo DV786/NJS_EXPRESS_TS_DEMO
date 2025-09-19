@@ -6,12 +6,15 @@ import { IPartialTaskWithId, ITask } from "./tasks.interface";
 import { TaskService } from "./tasks.service";
 import { UpdateTaskProvider } from "./providers/updateTask.provider";
 import { matchedData } from "express-validator";
+import { IPagination } from "./interface/pagination.interface";
+import { GetTaskProvider } from "./providers/getTask.provider";
 
 @injectable()
 export class TasksController {
   constructor(
     @inject(UserController) private userController: UserController,
     @inject(TaskService) private taskService: TaskService,
+    @inject(GetTaskProvider) private getTaskProvider: GetTaskProvider,
     @inject(UpdateTaskProvider) private updateTaskProvider: UpdateTaskProvider
   ) { }
 
@@ -24,8 +27,13 @@ export class TasksController {
 
 
   public async handleGetTask(req: Request, res: Response) {
-    const tasks = await this.taskService.findAll();
-    return tasks;
+    const validatedData: Partial<IPagination> = matchedData(req);
+    try {
+      const tasks: { data: ITask[], meta: {} } = await this.getTaskProvider.findAllTasks(validatedData);
+      return tasks;
+    } catch (error: any) {
+      throw new Error(error)
+    }
   };
 
   public async handlePatchTask(
